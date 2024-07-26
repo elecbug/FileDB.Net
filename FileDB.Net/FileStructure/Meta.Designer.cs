@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace FileDB.Net {
+namespace FileDB.Net.FileStructure {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace FileDB.Net {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Metadata {
+    internal class Meta {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Metadata() {
+        internal Meta() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace FileDB.Net {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("FileDB.Net.Metadata", typeof(Metadata).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("FileDB.Net.FileStructure.Meta", typeof(Meta).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,11 +61,20 @@ namespace FileDB.Net {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .data.
+        /// </summary>
+        internal static string DatasetFileName {
+            get {
+                return ResourceManager.GetString("DatasetFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to .meta.
         /// </summary>
-        internal static string Filename {
+        internal static string MetadataFileName {
             get {
-                return ResourceManager.GetString("Filename", resourceCulture);
+                return ResourceManager.GetString("MetadataFileName", resourceCulture);
             }
         }
     }

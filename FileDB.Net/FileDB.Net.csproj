@@ -7,17 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="Metadata.Designer.cs">
+    <Compile Update="FileStructure\Meta.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Metadata.resx</DependentUpon>
+      <DependentUpon>Meta.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Metadata.resx">
+    <EmbeddedResource Update="FileStructure\Meta.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Metadata.Designer.cs</LastGenOutput>
+      <LastGenOutput>Meta.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 
