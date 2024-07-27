@@ -6,21 +6,33 @@ using System.Threading.Tasks;
 
 namespace FileDB.Net.Utils
 {
+    /// <summary>
+    /// Excepted when directory is existed already
+    /// </summary>
     internal class DirectoryFoundException : Exception
     {
         public DirectoryFoundException(string message) : base(message) { }
     }
 
+    /// <summary>
+    /// Excepted when file is existed already
+    /// </summary>
     internal class FileFoundException : Exception
     {
         public FileFoundException(string message) : base(message) { }
     }
 
-    internal class MustUsePasswordException : Exception
+    /// <summary>
+    /// Excepted when table is used password but, you do not enter the password
+    /// </summary>
+    internal class NeedPasswordException : Exception
     {
-        public MustUsePasswordException(string message) : base(message) { }
+        public NeedPasswordException(string message) : base(message) { }
     }
 
+    /// <summary>
+    /// Excepted when occur duplicated primery key
+    /// </summary>
     internal class PriomeryKeyException : Exception
     {
         public PriomeryKeyException(string message) : base(message) { }

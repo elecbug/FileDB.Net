@@ -11,15 +11,43 @@ using FileDB.Net.Utils;
 
 namespace FileDB.Net
 {
+    /// <summary>
+    /// The class that help you create a set of C# data classes in a file and use them in table form
+    /// </summary>
+    /// <typeparam name="T"> The class type representing the form of the data </typeparam>
     public class Table<T>
     {
-        public string DBPath { get; private set; }
-        public bool AutoSave { get; set; }
-        public int PartitionSize { get; set; } = 100;
+        /// <summary>
+        /// File DB metadata from metadata file
+        /// </summary>
         private MetadataFile Metadata { get; set; }
+
+        /// <summary>
+        /// File DB data(row)'s list, The inner list represents each partition
+        /// </summary>
         private List<List<T>> ValuesList { get; set; }
         private byte[]? HashedPassword { get; set; }
 
+        /// <summary>
+        /// File DB directory path
+        /// </summary>
+        public string DBPath { get; private set; }
+
+        /// <summary>
+        /// Want to auto save when call insert or remove data
+        /// </summary>
+        public bool AutoSave { get; set; } = false;
+
+        /// <summary>
+        /// Count of one *.data-partition's data
+        /// </summary>
+        public int PartitionSize { get; set; } = 100;
+
+        /// <summary>
+        /// Make table object, Is called only Load or Create method
+        /// </summary>
+        /// <param name="path"> File DB path </param>
+        /// <param name="password"> Hashed password for File DB, and unused password if value is null </param>
         private Table(string path, byte[]? password)
         {
             if (Directory.Exists(path) == false)
@@ -39,7 +67,7 @@ namespace FileDB.Net
 
             if (Metadata.IsUsedPassword == true && password == null)
             {
-                throw new MustUsePasswordException("password is null");
+                throw new NeedPasswordException("password is null");
             }
 
             DirectoryInfo info = new DirectoryInfo(path);
@@ -51,11 +79,24 @@ namespace FileDB.Net
             }
         }
 
+        /// <summary>
+        /// Make table object, Is called only Load or Create method
+        /// </summary>
+        /// <param name="path"> File DB path </param>
+        /// <param name="password"> Password of File DB, and unused password if value is null </param>
+        /// <returns> Table object originating from File DB </returns>
         public static Table<T> Load(string path, string? password = null)
         {
             return new Table<T>(path, password != null ? SHA512.HashData(Encoding.UTF8.GetBytes(password)) : null);
         }
 
+        /// <summary>
+        /// Make table object, Is called only Load or Create method
+        /// </summary>
+        /// <param name="path"> File DB path to generate </param>
+        /// <param name="prioKey"> Priomery key will use this table </param>
+        /// <param name="password"> Password of File DB, and unused password if value is null </param>
+        /// <returns> Table object originating from generated </returns>
         public static Table<T> Create(string path, string prioKey, string? password = null)
         {
             if (Directory.Exists(path) == true && new DirectoryInfo(path).IsEmpty() == false)
@@ -85,6 +126,10 @@ namespace FileDB.Net
             return table;
         }
 
+        /// <summary>
+        /// Insert data to table
+        /// </summary>
+        /// <param name="value"> data to insert </param>
         public void Insert(T value)
         {
             object pk = typeof(T).GetProperty(Metadata.PrioKey)!.GetValue(value)!;
@@ -118,6 +163,11 @@ namespace FileDB.Net
             }
         }
 
+        /// <summary>
+        /// Find all data form table
+        /// </summary>
+        /// <param name="target"> Condition for data to target </param>
+        /// <returns> Found all data </returns>
         public List<T> FindAll(Predicate<T> target)
         {
             List<T> result = new List<T>();
@@ -136,6 +186,10 @@ namespace FileDB.Net
             return result;
         }
 
+        /// <summary>
+        /// Remove all data from table
+        /// </summary>
+        /// <param name="target"> Condition for data to target </param>
         public void RemoveAll(Predicate<T> target)
         {
             ParallelLoopResult p = Parallel.ForEach(ValuesList, list => list.RemoveAll(target));
@@ -148,6 +202,9 @@ namespace FileDB.Net
             }
         }
 
+        /// <summary>
+        /// Save all changes when before insert or remove data
+        /// </summary>
         public void SaveChanges()
         {
             ParallelLoopResult p = Parallel.For(0, ValuesList.Count, i =>

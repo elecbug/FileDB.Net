@@ -8,8 +8,18 @@ using System.Threading.Tasks;
 
 namespace FileDB.Net.FileStructure
 {
+    /// <summary>
+    /// Abstract file class
+    /// </summary>
     internal abstract class AFile
     {
+        /// <summary>
+        /// Save to file
+        /// </summary>
+        /// <typeparam name="T"> Data type </typeparam>
+        /// <param name="path"> Save to path </param>
+        /// <param name="password"> Hashed password form table </param>
+        /// <param name="IsHidden"> The file is hidden </param>
         public void Save<T>(string path, byte[]? password, bool IsHidden)
             where T : AFile
         {
@@ -38,6 +48,13 @@ namespace FileDB.Net.FileStructure
             }
         }
 
+        /// <summary>
+        /// Load from file
+        /// </summary>
+        /// <typeparam name="T"> Data type </typeparam>
+        /// <param name="path"> Load form path </param>
+        /// <param name="password"> Hashed password form table </param>
+        /// <returns> Loaded file's object form </returns>
         public static T? Load<T>(string path, byte[]? password)
             where T : AFile
         {
