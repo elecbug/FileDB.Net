@@ -16,8 +16,13 @@ namespace FileDB.Net.Utils
         public FileFoundException(string message) : base(message) { }
     }
 
-    internal class SchemeMismatchException : Exception
+    internal class MustUsePasswordException : Exception
     {
-        public SchemeMismatchException(string message) : base(message) { }
+        public MustUsePasswordException(string message) : base(message) { }
+    }
+
+    internal class PriomeryKeyException : Exception
+    {
+        public PriomeryKeyException(string message) : base(message) { }
     }
 }

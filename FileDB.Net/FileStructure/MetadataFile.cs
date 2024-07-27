@@ -8,6 +8,6 @@ namespace FileDB.Net.FileStructure
     {
         // public required string TcpEndPoint { get; set; }
         public required bool IsUsedPassword { get; set; }
-        public required Scheme[] Schemes { get; set; }
+        public required string PrioKey { get; set; }
     }
 }

@@ -13,6 +13,11 @@ namespace FileDB.Net.FileStructure
         public void Save<T>(string path, byte[]? password, bool IsHidden)
             where T : AFile
         {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
             string json = JsonSerializer.Serialize(this as T);
             byte[] buffer = Encoding.UTF8.GetBytes(json);
 

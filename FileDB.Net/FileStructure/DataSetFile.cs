@@ -2,8 +2,8 @@
 
 namespace FileDB.Net.FileStructure
 {
-    internal class DataSetFile : AFile
+    internal class DataSetFile<T> : AFile
     {
-        public required List<dynamic> Values { get; set; }
+        public required List<T> Values { get; set; }
     }
 }
