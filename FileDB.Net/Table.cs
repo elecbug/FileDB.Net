@@ -39,11 +39,6 @@ namespace FileDB.Net
         public bool AutoSave { get; set; } = false;
 
         /// <summary>
-        /// Count of one *.data-partition's data
-        /// </summary>
-        public int PartitionSize { get; set; } = 100;
-
-        /// <summary>
         /// Make table object, Is called only Load or Create method
         /// </summary>
         /// <param name="path"> File DB path </param>
@@ -95,9 +90,10 @@ namespace FileDB.Net
         /// </summary>
         /// <param name="path"> File DB path to generate </param>
         /// <param name="prioKey"> Priomery key will use this table </param>
+        /// <param name="partitionSize"> Count of one *.data-partition's data </param>
         /// <param name="password"> Password of File DB, and unused password if value is null </param>
         /// <returns> Table object originating from generated </returns>
-        public static Table<T> Create(string path, string prioKey, string? password = null)
+        public static Table<T> Create(string path, string prioKey, int partitionSize, string? password = null)
         {
             if (Directory.Exists(path) == true && new DirectoryInfo(path).IsEmpty() == false)
             {
@@ -112,6 +108,7 @@ namespace FileDB.Net
             {
                 IsUsedPassword = password != null,
                 PrioKey = prioKey,
+                PartitionSize = partitionSize,
                 //TcpEndPoint = tcpEndPoint.ToString(),
             };
             metadata.Save<MetadataFile>(Path.Combine(path, Meta.MetadataFileName), hashed, true);
@@ -142,7 +139,7 @@ namespace FileDB.Net
 
             foreach (var list in ValuesList)
             {
-                if (list.Count < PartitionSize)
+                if (list.Count < Metadata.PartitionSize)
                 {
                     list.Add(value);
                     

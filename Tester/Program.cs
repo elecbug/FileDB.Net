@@ -4,25 +4,26 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-//Table<D> table = Table<D>.Create
-//(
-//    Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\test",
-//    "ID"
-////IPEndPoint.Parse("127.0.0.1:3000")
-//);
+Table<D> table = Table<D>.Create
+(
+    Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\test",
+    "ID",
+    10000
+//IPEndPoint.Parse("127.0.0.1:3000")
+);
 
-//for (int i = 0; i < 100000; i++)
-//{
-//    table.Insert(new D()
-//    {
-//        ID = i,
-//        Name = "Lee-" + i,
-//        PhoneNumber = "12345-" + i,
-//        Data = new List<object> { "Hello", "world", 0, i }
-//    });
-//}
+for (int i = 0; i < 100000; i++)
+{
+    table.Insert(new D()
+    {
+        ID = i,
+        Name = "Lee-" + i,
+        PhoneNumber = "12345-" + i,
+        Data = new List<object> { "Hello", "world", 0, i }
+    });
+}
 
-//table.SaveChanges();
+table.SaveChanges();
 
 Table<D> table2 = Table<D>.Load
 (

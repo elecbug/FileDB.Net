@@ -18,5 +18,10 @@ namespace FileDB.Net.FileStructure
         /// Priomery key name of table
         /// </summary>
         public required string PrioKey { get; set; }
+
+        /// <summary>
+        /// Count of one *.data-partition's data
+        /// </summary>
+        public required int PartitionSize { get; set; }
     }
 }
