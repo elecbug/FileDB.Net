@@ -6,7 +6,7 @@ namespace FileDB.Net.FileStructure
 {
     internal class MetadataFile : AFile
     {
-        public required string TcpEndPoint { get; set; }
+        // public required string TcpEndPoint { get; set; }
         public required bool IsUsedPassword { get; set; }
         public required Scheme[] Schemes { get; set; }
     }

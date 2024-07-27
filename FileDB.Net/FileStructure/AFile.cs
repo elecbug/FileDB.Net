@@ -10,7 +10,7 @@ namespace FileDB.Net.FileStructure
 {
     internal abstract class AFile
     {
-        public void Save<T>(string path, byte[]? password)
+        public void Save<T>(string path, byte[]? password, bool IsHidden)
             where T : AFile
         {
             string json = JsonSerializer.Serialize(this as T);
@@ -26,8 +26,11 @@ namespace FileDB.Net.FileStructure
                 sw.Write(buffer);
             }
 
-            FileInfo info = new FileInfo(path);
-            info.Attributes |= FileAttributes.Hidden;
+            if (IsHidden == true)
+            {
+                FileInfo info = new FileInfo(path);
+                info.Attributes |= FileAttributes.Hidden;
+            }
         }
 
         public static T? Load<T>(string path, byte[]? password)

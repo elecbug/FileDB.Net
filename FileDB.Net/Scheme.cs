@@ -46,11 +46,12 @@ namespace FileDB.Net
     public enum SchemeType
     {
         None = 0,
-        IsArray = 1,
+        CanList = 1,
         CanString = 2,
         CanInt = 4,
         CanFloat = 8,
         CanBool = 16,
         Nullable = 32,
+        CanMultipleList = 64,
     }
 }

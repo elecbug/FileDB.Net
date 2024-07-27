@@ -13,7 +13,7 @@ namespace FileDB.Net
 {
     public class Manager
     {
-        public string SystemPath { get; private set; }
+        public string DBPath { get; private set; }
         public bool AutoSave { get; set; }
         private MetadataFile Metadata { get; set; }
         private List<dynamic> Values { get; set; }
@@ -31,7 +31,7 @@ namespace FileDB.Net
                 throw new FileNotFoundException(Path.Combine(path, Meta.MetadataFileName));
             }
 
-            SystemPath = path;
+            DBPath = path;
             Metadata = MetadataFile.Load<MetadataFile>(Path.Combine(path, Meta.MetadataFileName), password)!;
             Values = DataSetFile.Load<DataSetFile>(Path.Combine(path, Meta.DatasetFileName), password)!.Values;
             HashedPassword = password;
@@ -42,7 +42,7 @@ namespace FileDB.Net
             return new Manager(path, password != null ? SHA512.HashData(Encoding.UTF8.GetBytes(password)) : null);
         }
 
-        public static Manager Create(string path, Scheme[] schemes, IPEndPoint tcpEndPoint, string? password = null)
+        public static Manager Create(string path, Scheme[] schemes, /*IPEndPoint tcpEndPoint,*/ string? password = null)
         {
             if (Directory.Exists(path) == true && new DirectoryInfo(path).IsEmpty() == false)
             {
@@ -62,15 +62,15 @@ namespace FileDB.Net
             {
                 IsUsedPassword = password != null,
                 Schemes = schemes,
-                TcpEndPoint = tcpEndPoint.ToString(),
+                //TcpEndPoint = tcpEndPoint.ToString(),
             };
-            metadata.Save<MetadataFile>(Path.Combine(path, Meta.MetadataFileName), hashed);
+            metadata.Save<MetadataFile>(Path.Combine(path, Meta.MetadataFileName), hashed, true);
 
             DataSetFile data = new DataSetFile()
             {
                 Values = new List<dynamic>() { },
             };
-            data.Save<DataSetFile>(Path.Combine(path, Meta.DatasetFileName), hashed);
+            data.Save<DataSetFile>(Path.Combine(path, Meta.DatasetFileName), hashed, false);
 
             Manager manager = new Manager(path, hashed);
             return manager;
@@ -112,7 +112,7 @@ namespace FileDB.Net
                 Values = Values
             };
 
-            data.Save<DataSetFile>(Path.Combine(SystemPath, Meta.DatasetFileName), HashedPassword);
+            data.Save<DataSetFile>(Path.Combine(DBPath, Meta.DatasetFileName), HashedPassword, false);
         }
 
         private void CheckScheme(dynamic value)
@@ -133,10 +133,26 @@ namespace FileDB.Net
                     (inValue is INumber<float> && scheme.Type.HasFlag(SchemeType.CanFloat) == false) ||
                     (inValue is null && scheme.Type.HasFlag(SchemeType.Nullable) == false) ||
                     ((inValue is string || inValue is char) && scheme.Type.HasFlag(SchemeType.CanString) == false) ||
-                    (inValue is IList && scheme.Type.HasFlag(SchemeType.IsArray) == false) ||
+                    (inValue is IList && scheme.Type.HasFlag(SchemeType.CanList) == false) ||
                     (inValue is bool && scheme.Type.HasFlag(SchemeType.CanBool) == false))
                 {
                     throw new SchemeMismatchException(scheme.Field + ": " + inValue);
+                }
+
+                if (inValue is IList && scheme.Type.HasFlag(SchemeType.CanList) == true)
+                {
+                    foreach (var item in (inValue as IList)!)
+                    {
+                        if ((item is INumber<int> && scheme.Type.HasFlag(SchemeType.CanInt) == false) ||
+                            (item is INumber<float> && scheme.Type.HasFlag(SchemeType.CanFloat) == false) ||
+                            (item is null && scheme.Type.HasFlag(SchemeType.Nullable) == false) ||
+                            ((item is string || inValue is char) && scheme.Type.HasFlag(SchemeType.CanString) == false) ||
+                            (item is IList && scheme.Type.HasFlag(SchemeType.CanMultipleList) == false) ||
+                            (item is bool && scheme.Type.HasFlag(SchemeType.CanBool) == false))
+                        {
+                            throw new SchemeMismatchException(scheme.Field + ": " + inValue + "." + item);
+                        }
+                    }
                 }
             }
         }
