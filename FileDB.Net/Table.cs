@@ -26,6 +26,10 @@ namespace FileDB.Net
         /// File DB data(row)'s list, The inner list represents each partition
         /// </summary>
         private List<List<T>> ValuesList { get; set; }
+
+        /// <summary>
+        /// Hashed password, used current table
+        /// </summary>
         private byte[]? HashedPassword { get; set; }
 
         /// <summary>
