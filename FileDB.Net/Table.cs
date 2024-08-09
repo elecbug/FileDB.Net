@@ -23,9 +23,18 @@ namespace FileDB.Net
         private MetadataFile Metadata { get; set; }
 
         /// <summary>
-        /// File DB data(row)'s list, The inner list represents each partition
+        /// InnerList's list, The inner list represents each partition
         /// </summary>
-        private List<List<T>> ValuesList { get; set; }
+        private List<InnerList> ValuesList { get; set; }
+
+        /// <summary>
+        /// File DB data(row) & be changed class
+        /// </summary>
+        private class InnerList
+        {
+            public List<T> Values { get; set; } = new List<T>();
+            public bool IsChanged { get; set; } = false;
+        }
 
         /// <summary>
         /// Hashed password, used current table
@@ -59,7 +68,7 @@ namespace FileDB.Net
                 throw new FileNotFoundException(Path.Combine(path, Meta.MetadataFileName));
             }
 
-            ValuesList = new List<List<T>>();
+            ValuesList = new List<InnerList>();
             DBPath = path;
             Metadata = MetadataFile.Load<MetadataFile>(Path.Combine(path, Meta.MetadataFileName), password)!;
             HashedPassword = password;
@@ -74,7 +83,11 @@ namespace FileDB.Net
 
             foreach (FileInfo file in dataFiles)
             {
-                ValuesList.Add(DataSetFile<T>.Load<DataSetFile<T>>(Path.Combine(path, file.Name), password)!.Values);
+                ValuesList.Add(new InnerList()
+                {
+                    Values = DataSetFile<T>.Load<DataSetFile<T>>(Path.Combine(path, file.Name), password)!.Values,
+                    IsChanged = false,
+                });
             }
         }
 
@@ -130,23 +143,28 @@ namespace FileDB.Net
         /// <summary>
         /// Insert data to table
         /// </summary>
-        /// <param name="value"> data to insert </param>
-        public void Insert(T value)
+        /// <param name="value"> Data to insert </param>
+        /// <param name="pkCheck"> Check already using PK </param>
+        public void Insert(T value, bool pkCheck = true)
         {
-            object pk = typeof(T).GetProperty(Metadata.PrioKey)!.GetValue(value)!;
-            List<T> found = FindAll(x => typeof(T).GetProperty(Metadata.PrioKey)!.GetValue(x)!.Equals(pk));
-
-            if (found.Count != 0)
+            if (pkCheck == true)
             {
-                throw new PriomeryKeyException(pk.ToString()!);
+                object pk = typeof(T).GetProperty(Metadata.PrioKey)!.GetValue(value)!;
+                List<T> found = FindAll(x => typeof(T).GetProperty(Metadata.PrioKey)!.GetValue(x)!.Equals(pk));
+
+                if (found.Count != 0)
+                {
+                    throw new PriomeryKeyException(pk.ToString()!);
+                }
             }
 
             foreach (var list in ValuesList)
             {
-                if (list.Count < Metadata.PartitionSize)
+                if (list.Values.Count < Metadata.PartitionSize)
                 {
-                    list.Add(value);
-                    
+                    list.Values.Add(value);
+                    list.IsChanged = true;
+
                     if (AutoSave == true)
                     {
                         SaveChanges();
@@ -156,7 +174,11 @@ namespace FileDB.Net
                 }
             }
 
-            ValuesList.Add(new List<T> { value });
+            ValuesList.Add(new InnerList 
+            {
+                Values = new List<T> { value },
+                IsChanged = true,
+            });
 
             if (AutoSave == true)
             {
@@ -175,7 +197,7 @@ namespace FileDB.Net
 
             ParallelLoopResult p = Parallel.ForEach(ValuesList, list =>
             {
-                List<T> dynamics = list.FindAll(target);
+                List<T> dynamics = list.Values.FindAll(target);
 
                 lock (result)
                 {
@@ -193,7 +215,7 @@ namespace FileDB.Net
         /// <param name="target"> Condition for data to target </param>
         public void RemoveAll(Predicate<T> target)
         {
-            ParallelLoopResult p = Parallel.ForEach(ValuesList, list => list.RemoveAll(target));
+            ParallelLoopResult p = Parallel.ForEach(ValuesList, list => list.Values.RemoveAll(target));
 
             while (p.IsCompleted == false) ;
 
@@ -210,12 +232,15 @@ namespace FileDB.Net
         {
             ParallelLoopResult p = Parallel.For(0, ValuesList.Count, i =>
             {
-                DataSetFile<T> data = new DataSetFile<T>()
+                if (ValuesList[i].IsChanged == true)
                 {
-                    Values = ValuesList[i],
-                };
+                    DataSetFile<T> data = new DataSetFile<T>()
+                    {
+                        Values = ValuesList[i].Values,
+                    };
 
-                data.Save<DataSetFile<T>>(Path.Combine(DBPath, i + Meta.DatasetFileExtension), HashedPassword, false);
+                    data.Save<DataSetFile<T>>(Path.Combine(DBPath, i + Meta.DatasetFileExtension), HashedPassword, false);
+                }
             });
 
             while (p.IsCompleted == false) ;

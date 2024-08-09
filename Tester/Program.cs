@@ -20,7 +20,7 @@ for (int i = 0; i < 100000; i++)
         Name = "Lee-" + i,
         PhoneNumber = "12345-" + i,
         Data = new List<object> { "Hello", "world", 0, i }
-    });
+    }, false);
 }
 
 table.SaveChanges();
