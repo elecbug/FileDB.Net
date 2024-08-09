@@ -215,7 +215,11 @@ namespace FileDB.Net
         /// <param name="target"> Condition for data to target </param>
         public void RemoveAll(Predicate<T> target)
         {
-            ParallelLoopResult p = Parallel.ForEach(ValuesList, list => list.Values.RemoveAll(target));
+            ParallelLoopResult p = Parallel.ForEach(ValuesList, list => 
+            { 
+                int r = list.Values.RemoveAll(target);
+                if (r != 0) list.IsChanged = true;
+            });
 
             while (p.IsCompleted == false) ;
 
@@ -240,6 +244,8 @@ namespace FileDB.Net
                     };
 
                     data.Save<DataSetFile<T>>(Path.Combine(DBPath, i + Meta.DatasetFileExtension), HashedPassword, false);
+
+                    ValuesList[i].IsChanged = false;
                 }
             });
 
